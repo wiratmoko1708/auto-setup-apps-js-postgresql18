@@ -59,15 +59,15 @@ bash setup-npm-postgres.sh
 Script akan menanyakan beberapa hal secara berurutan:
 
 ```
-Nama database        [rag_chatbot]
-Username PostgreSQL  [kasbi_user]
+Nama database        [data_anda]
+Username PostgreSQL  [user_anda]
 Password PostgreSQL  : ****
-Path deploy aplikasi [/var/www/kasbi]
+Path deploy aplikasi [/var/www/domainanda]
 Git repository URL   : (kosongkan jika upload manual)
 OPENAI_API_KEY       : sk-xxxx
 OPENAI_BASE_URL      [https://ai.sumopod.com/v1]
-Domain/Subdomain     : kasbi.bpmp.go.id
-Email SSL Certbot    [admin@kasbi.bpmp.go.id]
+Domain/Subdomain     : subdomain.domainanda.com
+Email SSL Certbot    [admin@domainanda.com]
 ```
 
 ---
@@ -82,16 +82,16 @@ Tambahkan A Record di panel DNS domain kamu:
 
 ```
 Type  : A
-Name  : kasbi          (untuk subdomain kasbi.domain.com)
+Name  : subdomain          (untuk subdomain subdomain.domain.com)
         @              (untuk root domain domain.com)
 Value : IP_VPS_KAMU
 TTL   : 3600
 ```
 
-Contoh untuk subdomain `kasbi.bpmp.go.id`:
+Contoh untuk subdomain `subdomain.domain.com`:
 ```
 Type  : A
-Name  : kasbi
+Name  : subdomain
 Value : 103.x.x.x
 TTL   : 3600
 ```
@@ -101,7 +101,7 @@ TTL   : 3600
 Script akan mendeteksi dan menawarkan opsi lanjut tanpa SSL dulu. Setelah DNS propagasi (biasanya 5–30 menit), jalankan manual:
 
 ```bash
-certbot --nginx -d kasbi.bpmp.go.id --agree-tos -m admin@bpmp.go.id
+certbot --nginx -d subdomain.domain.com --agree-tos -m admin@domainanda.com
 ```
 
 SSL akan auto-renew setiap hari pukul 03:00 via crontab.
@@ -122,8 +122,8 @@ SSL akan auto-renew setiap hari pukul 03:00 via crontab.
 ### Isi .env.local yang dibuat otomatis
 
 ```env
-DATABASE_URL=postgresql://kasbi_user:****@localhost:5432/rag_chatbot
-POSTGRES_URL=postgresql://kasbi_user:****@localhost:5432/rag_chatbot
+DATABASE_URL=postgresql://user_anda:****@localhost:5432/rag_chatbot
+POSTGRES_URL=postgresql://user_anda:****@localhost:5432/rag_chatbot
 OPENAI_API_KEY=sk-xxxx
 OPENAI_BASE_URL=https://ai.sumopod.com/v1
 SESSION_SECRET=<random 32 byte>
@@ -136,13 +136,13 @@ SESSION_SECRET=<random 32 byte>
 | URL | Keterangan |
 |---|---|
 | `https://domain.com` | Halaman chatbot utama |
-| `https://domain.com/mburi/dashboard` | Dashboard admin |
+| `https://domain.com/admin/dashboard` | Dashboard admin |
 
 ### Login default dashboard
 
 | Role | Email | Password |
 |---|---|---|
-| Admin | `admin@bpmp.go.id` | `Admin2025!` |
+| Admin | `admin@domainanda.com` | `Admin123` |
 
 > **Segera ganti password** setelah login pertama melalui menu Manajemen User di dashboard.
 
@@ -155,19 +155,19 @@ SESSION_SECRET=<random 32 byte>
 pm2 status
 
 # Lihat log real-time
-pm2 logs kasbi-chatbot
+pm2 logs chatbot
 
 # Restart aplikasi
-pm2 restart kasbi-chatbot
+pm2 restart chatbot
 
 # Reload setelah update kode
-cd /var/www/kasbi && git pull && npm run build && pm2 restart kasbi-chatbot
+cd /var/www/domain && git pull && npm run build && pm2 restart kasbi-chatbot
 
 # Cek status PostgreSQL
 systemctl status postgresql
 
 # Masuk ke database
-sudo -u postgres psql -d rag_chatbot
+sudo -u postgres psql -d database_anda
 
 # Cek status Nginx
 systemctl status nginx
@@ -185,7 +185,7 @@ Script sudah otomatis menjalankan aplikasi via PM2. Tapi berikut penjelasan leng
 ### Pertama kali (setelah upload kode)
 
 ```bash
-cd /var/www/kasbi
+cd /var/www/domainanda
 
 # 1. Install semua dependencies
 npm install
@@ -203,19 +203,19 @@ pm2 save
 ### Setelah update kode
 
 ```bash
-cd /var/www/kasbi
+cd /var/www/domainanda
 
 git pull                  # ambil kode terbaru (jika pakai Git)
 npm install               # update dependencies jika ada perubahan package.json
 npm run build             # build ulang
-pm2 restart kasbi-chatbot # restart aplikasi
+pm2 restart domain_anda # restart aplikasi
 ```
 
 ### Cek aplikasi berjalan
 
 ```bash
-pm2 status                          # lihat status semua proses
-pm2 logs kasbi-chatbot --lines 50   # lihat 50 baris log terakhir
+pm2 status                           # lihat status semua proses
+pm2 logs chatbot --lines 50          # lihat 50 baris log terakhir
 curl http://localhost:3000           # test dari dalam server
 ```
 
@@ -234,7 +234,7 @@ npm run build  →  pm2 start
 Setelah aplikasi berjalan, upload dokumen PDF via dashboard admin atau gunakan script bulk:
 
 ```bash
-cd /var/www/kasbi
+cd /var/www/domainanda
 node scripts/bulk-upload-pdf.js /path/ke/folder/dokumen
 ```
 
@@ -244,17 +244,17 @@ node scripts/bulk-upload-pdf.js /path/ke/folder/dokumen
 
 **Aplikasi tidak bisa diakses**
 ```bash
-pm2 logs kasbi-chatbot   # cek error
-pm2 restart kasbi-chatbot
+pm2 logs chatbot   # cek error
+pm2 restart chatbot
 ```
 
 **SSL gagal**
 ```bash
 # Pastikan DNS sudah pointing ke server
-dig kasbi.bpmp.go.id
+dig subdomain.domainanda.com
 
 # Pasang SSL manual
-certbot --nginx -d kasbi.bpmp.go.id --agree-tos -m admin@bpmp.go.id
+certbot --nginx -d subdomain.domainanda.com --agree-tos -m admin@domainanda.com
 ```
 
 **Error koneksi database**
@@ -263,7 +263,7 @@ certbot --nginx -d kasbi.bpmp.go.id --agree-tos -m admin@bpmp.go.id
 systemctl status postgresql
 
 # Test koneksi
-psql postgresql://kasbi_user:PASSWORD@localhost:5432/rag_chatbot -c "\dt"
+psql postgresql://user_anda:PASSWORD@localhost:5432/rag_chatbot -c "\dt"
 ```
 
 **Port 3000 tidak bisa diakses dari luar**
