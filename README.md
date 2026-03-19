@@ -111,7 +111,7 @@ SSL akan auto-renew setiap hari pukul 03:00 via crontab.
 ## Struktur File yang Dibuat
 
 ```
-/var/www/kasbi/
+/var/www/folder/
 ├── .env.local          # Konfigurasi environment (DB, API key)
 ├── ecosystem.config.js # Konfigurasi PM2
 └── ...                 # File aplikasi Next.js
