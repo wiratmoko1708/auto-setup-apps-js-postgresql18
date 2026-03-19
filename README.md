@@ -1,4 +1,4 @@
-# Panduan Instalasi KASBI BPMP Papua di VPS
+# Panduan Instalasi Chatbot di VPS
 
 Script `setup-npm-postgres.sh` mengotomasi seluruh proses instalasi aplikasi RAG Chatbot di VPS Debian 12.
 
